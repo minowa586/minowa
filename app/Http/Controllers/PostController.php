@@ -3,24 +3,29 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
-use Illuminate\Http\Request;
+use App\Http\Requests\PostRequest; // useする
 
 class PostController extends Controller
 {
     public function index(Post $post)
-{
-    return view('posts.index')->with(['posts' =>Post::orderBy('updated_at', 'desc')->paginate(10)
-]);
-}
-    /**
- * 特定IDのpostを表示する
- *
- * @params Object Post // 引数の$postはid=1のPostインスタンス
- * @return Reposnse post view
- */
+    {
+        return view('posts.index')->with(['posts' => $post->getByLimit()]);
+    }
+
     public function show(Post $post)
-{
-    return view('posts.show')->with(['post' => $post]);
- //'post'はbladeファイルで使う変数。中身は$postはid=1のPostインスタンス。
-}
+    {
+        return view('posts.show')->with(['post' => $post]);
+    }
+
+    public function create()
+    {
+        return view('posts.create');
+    }
+
+    public function store(Post $post, PostRequest $request) // 引数をRequestからPostRequestにする
+    {
+        $input = $request['post'];
+        $post->fill($input)->save();
+        return redirect('/posts/' . $post->id);
+    }
 }
